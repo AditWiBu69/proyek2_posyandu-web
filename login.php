@@ -3,10 +3,10 @@
 session_start();
 
 // Konfigurasi database
-$servername = "localhost";
+$servername = "localhost:3307";
 $username = "root";
 $password = "";
-$dbname = "dbsipograf";
+$dbname = "dbsipograf1";
 
 // Membuat koneksi ke database
 $conn = new mysqli($servername, $username, $password, $dbname);

@@ -2,10 +2,10 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Host: 127.0.0.1
--- Generation Time: May 29, 2025 at 09:36 PM
--- Server version: 10.4.32-MariaDB
--- PHP Version: 8.2.12
+-- Host: 127.0.0.1:3307
+-- Waktu pembuatan: 11 Des 2025 pada 08.03
+-- Versi server: 10.4.28-MariaDB
+-- Versi PHP: 8.2.4
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -18,31 +18,40 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `dbsipograf`
+-- Database: `dbsipograf1`
 --
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `masuk`
+-- Struktur dari tabel `masuk`
 --
 
 CREATE TABLE `masuk` (
-  `username` varchar(10) NOT NULL,
-  `password` varchar(8) NOT NULL
+  `id_user` int(255) NOT NULL,
+  `username` varchar(255) NOT NULL,
+  `password` varchar(8) NOT NULL,
+  `role` enum('admin','user') DEFAULT 'user'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
 --
--- Dumping data for table `masuk`
+-- Dumping data untuk tabel `masuk`
 --
 
-INSERT INTO `masuk` (`username`, `password`) VALUES
-('admin', 'Abc123');
+INSERT INTO `masuk` (`id_user`, `username`, `password`, `role`) VALUES
+(1, 'admin', 'Abc123', 'admin'),
+(2, 'Ani Nursanti', '123', 'user'),
+(4, 'Catur Wulandari', '123', 'user'),
+(6, 'Sekar Ayuningtyas', '123', 'user'),
+(7, 'Sulistyowati Eka', '123', 'user'),
+(8, 'Kayla Restu', '123', 'user'),
+(9, 'wan', '123', 'user'),
+(10, 'momoka nishina', '123', 'user');
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `t_anak`
+-- Struktur dari tabel `t_anak`
 --
 
 CREATE TABLE `t_anak` (
@@ -56,7 +65,7 @@ CREATE TABLE `t_anak` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `t_anak`
+-- Dumping data untuk tabel `t_anak`
 --
 
 INSERT INTO `t_anak` (`id_anak`, `nama_anak`, `nama_ibu`, `tempat_lahir`, `tanggal_lahir`, `jenis_kelamin`, `alamat`) VALUES
@@ -71,7 +80,7 @@ INSERT INTO `t_anak` (`id_anak`, `nama_anak`, `nama_ibu`, `tempat_lahir`, `tangg
 -- --------------------------------------------------------
 
 --
--- Table structure for table `t_penimbangan`
+-- Struktur dari tabel `t_penimbangan`
 --
 
 CREATE TABLE `t_penimbangan` (
@@ -87,7 +96,7 @@ CREATE TABLE `t_penimbangan` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `t_penimbangan`
+-- Dumping data untuk tabel `t_penimbangan`
 --
 
 INSERT INTO `t_penimbangan` (`id_penimbangan`, `id_anak`, `tgl_penimbangan`, `umur`, `berat_badan`, `tinggi_badan`, `keterangan`, `petugas`, `posyandu`) VALUES
@@ -117,40 +126,53 @@ INSERT INTO `t_penimbangan` (`id_penimbangan`, `id_anak`, `tgl_penimbangan`, `um
 (60, 1, '2023-09-18', 23, 12.5, 86.9, 'Asi Eksklusif', 'Yanti', 'Posyandu Melati'),
 (61, 1, '2023-10-17', 24, 12.7, 87.8, 'Asi Eksklusif', 'Yanti', 'Posyandu Melati'),
 (62, 11, '2023-11-17', 0, 5, 50, 'Asi Eksklusif', 'Tanti', 'Posyandu Melati'),
-(63, 11, '2023-11-24', 1, 4, 56, '-', '-', '-');
+(63, 11, '2023-11-24', 1, 4, 56, '-', '-', '-'),
+(64, 16, '2025-12-10', 1, 5, 55, 'Asi Eksklusif', 'Rini', 'Posyandu Melati');
 
 --
 -- Indexes for dumped tables
 --
 
 --
--- Indexes for table `t_anak`
+-- Indeks untuk tabel `masuk`
+--
+ALTER TABLE `masuk`
+  ADD PRIMARY KEY (`id_user`);
+
+--
+-- Indeks untuk tabel `t_anak`
 --
 ALTER TABLE `t_anak`
   ADD PRIMARY KEY (`id_anak`);
 
 --
--- Indexes for table `t_penimbangan`
+-- Indeks untuk tabel `t_penimbangan`
 --
 ALTER TABLE `t_penimbangan`
   ADD PRIMARY KEY (`id_penimbangan`),
   ADD KEY `data_penimbangan_ibfk_1` (`id_anak`);
 
 --
--- AUTO_INCREMENT for dumped tables
+-- AUTO_INCREMENT untuk tabel yang dibuang
 --
 
 --
--- AUTO_INCREMENT for table `t_anak`
+-- AUTO_INCREMENT untuk tabel `masuk`
+--
+ALTER TABLE `masuk`
+  MODIFY `id_user` int(255) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+
+--
+-- AUTO_INCREMENT untuk tabel `t_anak`
 --
 ALTER TABLE `t_anak`
   MODIFY `id_anak` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
--- AUTO_INCREMENT for table `t_penimbangan`
+-- AUTO_INCREMENT untuk tabel `t_penimbangan`
 --
 ALTER TABLE `t_penimbangan`
-  MODIFY `id_penimbangan` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=64;
+  MODIFY `id_penimbangan` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=65;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

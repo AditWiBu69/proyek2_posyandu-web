@@ -2,12 +2,14 @@
 session_start();
 
 // 1. Konfigurasi Koneksi Database
-$host = "localhost";
-$user = "root"; // Sesuaikan user db
-$pass = "";     // Sesuaikan password db
-$db   = "dbsipograf";
+$host = "127.0.0.1"; // Gunakan IP 127.0.0.1
+$user = "root";
+$pass = "";
+$db   = "dbsipograf1"; // Pastikan nama DB sama dengan di phpMyAdmin (dbsipograf atau dbsipograf1?)
+$port = 3307; // <--- PENTING: Tambahkan Port 3307
 
-$koneksi = mysqli_connect($host, $user, $pass, $db);
+// Tambahkan variabel $port di parameter ke-5
+$koneksi = mysqli_connect($host, $user, $pass, $db, $port);
 
 if (!$koneksi) {
     die("Koneksi gagal: " . mysqli_connect_error());
@@ -20,11 +22,12 @@ if (!isset($_SESSION['username']) || $_SESSION['role'] != 'user') {
 }
 
 // 3. Ambil ID User yang sedang login
-// Kita butuh ID (angka) dari tabel masuk, bukan cuma username, untuk filter data anak
 $username_session = $_SESSION['username'];
-$query_user = mysqli_query($koneksi, "SELECT id FROM masuk WHERE username = '$username_session'");
+
+// PERBAIKAN: Ganti 'id' menjadi 'id_user' di SELECT dan di variabel array
+$query_user = mysqli_query($koneksi, "SELECT id_user FROM masuk WHERE username = '$username_session'");
 $data_user = mysqli_fetch_assoc($query_user);
-$id_user_login = $data_user['id'];
+$id_user_login = $data_user['id_user']; // <--- PENTING: Sesuaikan index array ini
 
 // Variabel sapaan
 $nama_pengguna = $username_session;
@@ -135,13 +138,13 @@ $query = "
     FROM 
         masuk m
     JOIN 
-        t_anak ta ON m.id = ta.id_user          -- Hubungkan User ke Anak
+        t_anak ta ON m.username = ta.nama_ibu  -- HUBUNGKAN BERDASARKAN NAMA
     JOIN 
-        t_penimbangan tp ON ta.id_anak = tp.id_anak  -- Hubungkan Anak ke Penimbangan
+        t_penimbangan tp ON ta.id_anak = tp.id_anak 
     WHERE 
-        m.username = '$username_session'        -- Filter hanya milik user yang login
+        m.username = '$username_session' 
     ORDER BY 
-        tp.tgl_penimbangan DESC                 -- Tampilkan data terbaru paling atas
+        tp.tgl_penimbangan DESC
 ";
 
 $result = mysqli_query($koneksi, $query);

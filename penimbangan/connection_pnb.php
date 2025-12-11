@@ -1,13 +1,16 @@
 <?php
-
-$server = 'localhost';
-$username = 'root';
-$password = '';
-$database = 'dbpy';
+// Konfigurasi Database
+$servername = "127.0.0.1";
+$username = "root";
+$password = ""; 
+$dbname = "dbsipograf1"; 
+$port = 3307; // Pastikan Port 3307
 
 try {
-    $conn = new PDO("mysql:host=$server;dbname=$database", $username, $password);
-} catch (PDOException $e) {
-    echo 'Koneksi gagal: ' . $e->getMessage();
+    $conn = new PDO("mysql:host=$servername;port=$port;dbname=$dbname", $username, $password);
+    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+} catch(PDOException $e) {
+    echo "Koneksi gagal: " . $e->getMessage();
+    die();
 }
 ?>

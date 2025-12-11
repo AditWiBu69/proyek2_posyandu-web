@@ -1,6 +1,14 @@
 <!DOCTYPE html>
 <html>
+<?php
+// Masukkan koneksi di paling atas
+include "connection.php"; 
 
+// Cek apakah $conn berhasil dikenali
+if (!isset($conn)) {
+    die("Error: File connection.php berhasil di-include, tapi variabel \$conn tidak ditemukan. Cek nama variabel di connection.php");
+}
+?>
 <head>
   <title>Data Anak Posyandu</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
