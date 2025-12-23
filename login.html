@@ -9,7 +9,7 @@
         background-size: cover;
         background-repeat: no-repeat;
         background-position: center;
-        padding: 20px;
+        padding: px;
         text-align: center;
         min-height: 100vh;
       }
@@ -30,15 +30,9 @@
       }
 
       @keyframes frame-anim {
-        0% {
-          transform: scale(1);
-        }
-        50% {
-          transform: scale(1.02);
-        }
-        100% {
-          transform: scale(1);
-        }
+        0% { transform: scale(1); }
+        50% { transform: scale(1.02); }
+        100% { transform: scale(1); }
       }
 
       label {
@@ -58,6 +52,14 @@
         box-sizing: border-box;
       }
 
+      /* Container untuk tombol agar sejajar */
+      .button-group {
+        display: flex;
+        justify-content: space-between; /* Memberi jarak antara tombol */
+        gap: 10px;
+      }
+
+      /* Style Tombol Login (Bawaan) */
       .login-box button {
         background-color: #2f557e;
         color: #fff;
@@ -69,15 +71,13 @@
         position: relative;
         overflow: hidden;
         z-index: 1;
+        flex: 1; /* Agar lebar tombol seimbang */
       }
 
       .login-box button::before {
         content: "";
         position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
+        top: 0; left: 0; width: 100%; height: 100%;
         border: 2px solid #03e9f4;
         border-radius: 5px;
         opacity: 0;
@@ -91,13 +91,28 @@
         transform: scale(1);
       }
 
+      /* Style Tombol Kembali (BARU) */
+      .btn-back {
+        background-color: #d9534f; /* Warna Merah */
+        color: #fff;
+        padding: 10px 15px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+        text-decoration: none; /* Menghilangkan garis bawah link */
+        text-align: center;
+        flex: 1; /* Agar lebar tombol seimbang */
+        transition: background-color 0.3s;
+      }
+
+      .btn-back:hover {
+        background-color: #c9302c; /* Merah lebih gelap saat hover */
+      }
+
       @keyframes neon-anim {
-        0% {
-          transform: scale(0) rotate(0deg);
-        }
-        100% {
-          transform: scale(1) rotate(360deg);
-        }
+        0% { transform: scale(0) rotate(0deg); }
+        100% { transform: scale(1) rotate(360deg); }
       }
     </style>
   </head>
@@ -113,9 +128,12 @@
           <label for="password">Password:</label>
           <input type="password" id="password" name="password" required />
         </div>
-        <div>
+        
+        <div class="button-group">
           <button type="submit">Login</button>
+          <a href="index.html" class="btn-back">Kembali</a>
         </div>
+
       </form>
     </div>
   </body>

@@ -88,17 +88,9 @@ $conn->close();
     }
 
     @keyframes frame-anim {
-      0% {
-        transform: scale(1);
-      }
-
-      50% {
-        transform: scale(1.02);
-      }
-
-      100% {
-        transform: scale(1);
-      }
+      0% { transform: scale(1); }
+      50% { transform: scale(1.02); }
+      100% { transform: scale(1); }
     }
 
     label {
@@ -118,6 +110,7 @@ $conn->close();
       box-sizing: border-box;
     }
 
+    /* Style Tombol Login */
     .login-box button {
       background-color: #2f557e;
       color: #fff;
@@ -134,10 +127,7 @@ $conn->close();
     .login-box button::before {
       content: '';
       position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
+      top: 0; left: 0; width: 100%; height: 100%;
       border: 2px solid #03e9f4;
       border-radius: 5px;
       opacity: 0;
@@ -152,13 +142,34 @@ $conn->close();
     }
 
     @keyframes neon-anim {
-      0% {
-        transform: scale(0) rotate(0deg);
-      }
+      0% { transform: scale(0) rotate(0deg); }
+      100% { transform: scale(1) rotate(360deg); }
+    }
 
-      100% {
-        transform: scale(1) rotate(360deg);
-      }
+    /* --- STYLE TOMBOL KEMBALI (BARU) --- */
+    .btn-back {
+        display: inline-block;
+        background-color: #dc3545; /* Merah */
+        color: white;
+        padding: 10px 15px;
+        text-decoration: none; /* Hilangkan garis bawah link */
+        border-radius: 4px;
+        font-size: 16px;
+        cursor: pointer;
+        margin-left: 10px; /* Jarak dari tombol login */
+        border: none;
+        transition: 0.3s;
+    }
+
+    .btn-back:hover {
+        background-color: #a71d2a; /* Merah lebih gelap saat hover */
+    }
+
+    .button-container {
+        display: flex;
+        justify-content: center; /* Posisi tombol di tengah */
+        align-items: center;
+        margin-top: 10px;
     }
 
     /* Style untuk blok notifikasi error */
@@ -193,17 +204,19 @@ $conn->close();
         <label for="password">Password:</label>
         <input type="password" id="password" name="password" required>
       </div>
+      
       <?php
       if (isset($error_msg)) {
         echo '<div class="error-msg">' . $error_msg . '</div>';
       }
       ?>
-      <div>
+
+      <div class="button-container">
         <button type="submit">Login</button>
+        <a href="index.html" class="btn-back">Kembali</a>
       </div>
     </form>
   </div>
-  <!-- Blok notifikasi error -->
 </body>
 
 </html>

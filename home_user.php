@@ -89,7 +89,7 @@ $status_daftar = isset($_GET['status']) ? $_GET['status'] : '';
 
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top shadow-sm">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="#">SIPOGRAF USER</a>
+            <a class="navbar-brand fw-bold" href="#">SiMona USER</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -282,7 +282,7 @@ $query_jadwal = mysqli_query($koneksi, "SELECT * FROM t_jadwal ORDER BY tanggal 
 
     <footer class="bg-dark text-white text-center py-4 mt-auto">
         <div class="container">
-            <p class="mb-0 small">&copy; 2024 SIPOGRAF - Sistem Informasi Posyandu.</p>
+            <p class="mb-0 small">&copy; 2025 SiMona - Sistem Informasi Posyandu.</p>
         </div>
     </footer>
 
