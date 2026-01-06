@@ -113,24 +113,41 @@
     </div>
 
     <?php
-    // Menerima parameter id_anak dari URL
-    $id_anak = $_GET["id_anak"];
-    $conn = mysqli_connect("localhost", "root", "", "dbpy");
+    // 1. Menerima parameter id_anak dari URL
+    // Menggunakan isset agar tidak error jika id_anak kosong
+    $id_anak = isset($_GET["id_anak"]) ? $_GET["id_anak"] : 0; 
 
-    // Query data dari database berdasarkan id_anak
-    $query = "SELECT umur, berat_badan FROM t_penimbangan WHERE id_anak = $id_anak";
-    $result = mysqli_query($conn, $query);
+    // 2. KONFIGURASI KONEKSI (DENGAN PORT 3307)
+    $host = "127.0.0.1";
+    $user = "root";
+    $pass = "";
+    $db   = "dbsipograf1"; 
+    $port = 3307; // <--- PENTING: Port diset ke 3307
 
-    // Olah data menjadi format yang sesuai untuk Chart.js
-    $data = [];
-    while ($row = mysqli_fetch_assoc($result)) {
-        $data[] = [
-            'umur' => $row['umur'],
-            'berat_badan' => $row['berat_badan'],
-        ];
+    // Menghubungkan ke database dengan port spesifik
+    $conn = mysqli_connect($host, $user, $pass, $db, $port);
+
+    // Cek koneksi
+    if (!$conn) {
+        die("Koneksi Gagal: " . mysqli_connect_error() . " (Cek apakah Port 3307 benar?)");
     }
 
-    // Menghitung kisaran berat badan normal (contoh statis)
+    // 3. Query data dari database berdasarkan id_anak
+    $query = "SELECT umur, berat_badan FROM t_penimbangan WHERE id_anak = $id_anak ORDER BY umur ASC";
+    $result = mysqli_query($conn, $query);
+
+    // 4. Olah data menjadi format yang sesuai untuk Chart.js
+    $data = [];
+    if (mysqli_num_rows($result) > 0) {
+        while ($row = mysqli_fetch_assoc($result)) {
+            $data[] = [
+                'umur' => $row['umur'],
+                'berat_badan' => $row['berat_badan'],
+            ];
+        }
+    }
+
+    // 5. Menghitung kisaran berat badan normal (Statis)
     $normalRanges = [
         ['umur' => 0, 'lower' => 3.2, 'upper' => 3.3],
         ['umur' => 1, 'lower' => 4.2, 'upper' => 4.5],
@@ -157,7 +174,6 @@
         ['umur' => 22, 'lower' => 11.1, 'upper' => 11.8],
         ['umur' => 23, 'lower' => 11.3, 'upper' => 12],
         ['umur' => 24, 'lower' => 11.5, 'upper' => 12.2],
-        // Tambahkan kisaran berat badan normal untuk rentang usia lainnya
     ];
     ?>
     <script>
