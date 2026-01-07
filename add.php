@@ -1,22 +1,26 @@
 <?php
 include_once('connection.php');
 
-$nama_anak = $_POST['nama_anak'];
-$nama_ibu = $_POST['nama_ibu'];
-$tempat_lahir = $_POST['tempat_lahir'];
+// 1. Ambil data dari form (perhatikan nama variabelnya)
+$nama_anak     = $_POST['nama_anak'];
+$id_orangtua   = $_POST['id_orangtua']; // <-- Dulu $_POST['nama_ibu'], sekarang jadi id_orangtua
+$tempat_lahir  = $_POST['tempat_lahir'];
 $tanggal_lahir = $_POST['tanggal_lahir'];
 $jenis_kelamin = $_POST['jenis_kelamin'];
-$alamat = $_POST['alamat'];
+$alamat        = $_POST['alamat'];
 
-$statement = $conn->prepare('INSERT INTO t_anak (nama_anak, nama_ibu, tempat_lahir, tanggal_lahir, jenis_kelamin, alamat) VALUES (:nama_anak, :nama_ibu, :tempat_lahir, :tanggal_lahir, :jenis_kelamin, :alamat)');
+// 2. Siapkan Query SQL
+// Ganti kolom 'nama_ibu' menjadi 'id_orangtua'
+$statement = $conn->prepare('INSERT INTO t_anak (nama_anak, id_orangtua, tempat_lahir, tanggal_lahir, jenis_kelamin, alamat) VALUES (:nama_anak, :id_orangtua, :tempat_lahir, :tanggal_lahir, :jenis_kelamin, :alamat)');
 
+// 3. Eksekusi Query
 $result = $statement->execute([
-    'nama_anak' => $nama_anak,
-    'nama_ibu' => $nama_ibu,
-    'tempat_lahir' => $tempat_lahir,
+    'nama_anak'     => $nama_anak,
+    'id_orangtua'   => $id_orangtua, // <-- Mapping parameter juga diganti
+    'tempat_lahir'  => $tempat_lahir,
     'tanggal_lahir' => $tanggal_lahir,
     'jenis_kelamin' => $jenis_kelamin,
-    'alamat' => $alamat
+    'alamat'        => $alamat
 ]);
 
 // Cek jika data berhasil disimpan

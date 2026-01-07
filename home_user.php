@@ -14,26 +14,23 @@ if (!$koneksi) {
     die("Koneksi gagal: " . mysqli_connect_error());
 }
 
-// 2. Cek Keamanan
+// 2. Cek Keamanan Login
 if (!isset($_SESSION['username']) || $_SESSION['role'] != 'user') {
     header("Location: login.php");
     exit();
 }
 
-// 3. Ambil ID User yang sedang login
+// 3. Ambil Data User yang sedang login
 $username_session = $_SESSION['username'];
 
-// Ambil ID User saja (hapus nama_lengkap dari query)
-$query_user = mysqli_query($koneksi, "SELECT id_user FROM masuk WHERE username = '$username_session'");
+// Ambil detail lengkap user dari tabel masuk
+$query_user = mysqli_query($koneksi, "SELECT id_user, nama_lengkap FROM masuk WHERE username = '$username_session'");
 $data_user = mysqli_fetch_assoc($query_user);
 
-// Simpan ID User
 $id_user_login = $data_user['id_user']; 
+$nama_lengkap_user = $data_user['nama_lengkap'];
 
-// Karena kolom nama_lengkap tidak ada, gunakan username sebagai nama tampilan
-$nama_lengkap_user = $username_session;
-
-// Cek notifikasi status (jika ada redirect dari proses daftar)
+// Cek notifikasi status (untuk alert setelah daftar)
 $status_daftar = isset($_GET['status']) ? $_GET['status'] : '';
 ?>
 
@@ -108,112 +105,88 @@ $status_daftar = isset($_GET['status']) ? $_GET['status'] : '';
 
     <div class="hero-banner text-center">
         <div class="container">
-            <h2 class="display-5 fw-bold">Halo, Bunda <?php echo htmlspecialchars($username_session); ?>!</h2>
+            <h2 class="display-5 fw-bold">Halo, Bunda <?php echo htmlspecialchars($nama_lengkap_user); ?>!</h2>
             <p class="lead">Selamat datang di Dashboard Monitoring Kesehatan Anak.</p>
         </div>
     </div>
 
     <div class="container">
+<section id="data-anak" class="mb-5 pt-4">
+    <h3 class="section-header">Riwayat Penimbangan Anak</h3>
+    <div class="card card-custom bg-white p-4">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-primary">
+                    <tr>
+                        <th>Tanggal</th>
+                        <th>Nama Anak</th> <th>Usia</th>
+                        <th>Berat (BB)</th>
+                        <th>Tinggi (TB)</th>
+                        <th>Keterangan</th>
+                    </tr>
+                </thead>
+                <tbody>
+    <?php
+    // PERBAIKAN QUERY: Menggunakan LEFT JOIN agar semua anak tetap muncul
+    // meskipun belum ada data penimbangan
+    $query = "
+        SELECT 
+            tp.tgl_penimbangan, 
+            tp.umur, 
+            tp.berat_badan, 
+            tp.tinggi_badan, 
+            tp.keterangan, 
+            ta.nama_anak 
+        FROM masuk m
+        JOIN t_orangtua tor ON m.nama_lengkap = tor.nama_ibu
+        JOIN t_anak ta ON tor.id_orangtua = ta.id_orangtua
+        LEFT JOIN t_penimbangan tp ON ta.id_anak = tp.id_anak  -- Ganti jadi LEFT JOIN
+        WHERE m.username = '$username_session' 
+        ORDER BY ta.nama_anak ASC, tp.tgl_penimbangan DESC
+    ";
 
-        <section id="data-anak" class="mb-5 pt-4">
-            <h3 class="section-header">Riwayat Penimbangan Anak</h3>
-            <div class="card card-custom bg-white p-4">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle">
-                        <thead class="table-primary">
-                            <tr>
-                                <th>Tanggal</th>
-                                <th>Nama Anak</th>
-                                <th>Usia</th>
-                                <th>Berat (BB)</th>
-                                <th>Tinggi (TB)</th>
-                                <th>Keterangan</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php
-                            $query = "
-                                SELECT tp.tgl_penimbangan, tp.umur, tp.berat_badan, tp.tinggi_badan, tp.keterangan, ta.nama_anak 
-                                FROM masuk m
-                                JOIN t_anak ta ON m.username = ta.nama_ibu
-                                JOIN t_penimbangan tp ON ta.id_anak = tp.id_anak 
-                                WHERE m.username = '$username_session' 
-                                ORDER BY tp.tgl_penimbangan DESC
-                            ";
-                            $result = mysqli_query($koneksi, $query);
+    $result = mysqli_query($koneksi, $query);
 
-                            if (mysqli_num_rows($result) > 0) {
-                                while ($row = mysqli_fetch_assoc($result)) {
-                                    $tanggal = date('d F Y', strtotime($row['tgl_penimbangan']));
-                                    echo "<tr>
-                                        <td>" . htmlspecialchars($tanggal) . "</td>
-                                        <td>" . htmlspecialchars($row['nama_anak']) . "</td>
-                                        <td>" . htmlspecialchars($row['umur']) . " Bulan</td>
-                                        <td>" . htmlspecialchars($row['berat_badan']) . " Kg</td>
-                                        <td>" . htmlspecialchars($row['tinggi_badan']) . " Cm</td>
-                                        <td>" . htmlspecialchars($row['keterangan']) . "</td>
-                                    </tr>";
-                                }
-                            } else {
-                                echo '<tr><td colspan="6" class="text-center py-4 text-muted">Belum ada data penimbangan.</td></tr>';
-                            }
-                            ?>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
+    if (!$result) {
+        die("Query Error: " . mysqli_error($koneksi));
+    }
 
-        <section id="jadwal" class="mb-5 pt-4">
-            <h3 class="section-header">Jadwal Kegiatan Posyandu</h3>
-            <p class="text-muted mb-4">Silakan klik tombol "Daftar Kegiatan" untuk melakukan pendaftaran online.</p>
-            
-            <div class="row g-4">
-                <?php
-                // Mengambil data jadwal dari database agar dinamis
-$query_jadwal = mysqli_query($koneksi, "SELECT * FROM t_jadwal ORDER BY tanggal DESC");                
-                if (mysqli_num_rows($query_jadwal) > 0) {
-                    while ($jadwal = mysqli_fetch_assoc($query_jadwal)) {
-                        $tgl_kegiatan = date('d F Y', strtotime($jadwal['tanggal']));
-                        ?>
-                        <div class="col-md-6">
-                            <div class="card card-custom h-100 border-start border-5 border-info">
-                                <div class="card-body">
-                                    <h5 class="card-title text-primary fw-bold"><?= $jadwal['nama_kegiatan']; ?></h5>
-                                    <hr>
-                                    <p class="mb-1"><strong>📅 Tanggal:</strong> <?= $tgl_kegiatan; ?></p>
-                                    <p class="mb-1"><strong>🕗 Waktu:</strong> <?= $jadwal['waktu']; ?></p>
-                                    <p class="mb-3"><strong>📍 Tempat:</strong> <?= $jadwal['tempat']; ?></p>
-                                    
-                                    <button 
-                                        type="button" 
-                                        class="btn btn-info w-100 text-white fw-bold btn-daftar"
-                                        data-bs-toggle="modal" 
-                                        data-bs-target="#modalDaftar"
-                                        data-id="<?= $jadwal['id_jadwal']; ?>"
-                                        data-kegiatan="<?= $jadwal['nama_kegiatan']; ?>"
-                                        data-tanggal="<?= $tgl_kegiatan; ?>"
-                                        data-lokasi="<?= $jadwal['tempat']; ?>">
-                                        📝 Daftar Kegiatan Ini
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        <?php
-                    }
-                } else {
-                    echo '<div class="col-12"><div class="alert alert-warning">Belum ada jadwal kegiatan yang tersedia.</div></div>';
-                }
-                ?>
-            </div>
-        </section>
+    if (mysqli_num_rows($result) > 0) {
+        while ($row = mysqli_fetch_assoc($result)) {
+            // Cek apakah ada data penimbangan atau null (karena LEFT JOIN)
+            $ada_data = !empty($row['tgl_penimbangan']);
 
+            // Format tampilan jika data kosong
+            $tanggal = $ada_data ? date('d F Y', strtotime($row['tgl_penimbangan'])) : '-';
+            $umur    = $ada_data ? htmlspecialchars($row['umur']) . " Bulan" : '-';
+            $berat   = $ada_data ? htmlspecialchars($row['berat_badan']) . " Kg" : '<span class="badge bg-secondary">Belum ditimbang</span>';
+            $tinggi  = $ada_data ? htmlspecialchars($row['tinggi_badan']) . " Cm" : '-';
+            $ket     = $ada_data ? htmlspecialchars($row['keterangan']) : '-';
+
+            echo "<tr>
+                <td>" . $tanggal . "</td>
+                <td class='fw-bold text-primary'>" . htmlspecialchars($row['nama_anak']) . "</td>
+                <td>" . $umur . "</td>
+                <td>" . $berat . "</td>
+                <td>" . $tinggi . "</td>
+                <td>" . $ket . "</td>
+            </tr>";
+        }
+    } else {
+        echo '<tr><td colspan="6" class="text-center py-4 text-muted">Data anak tidak ditemukan. Pastikan nama lengkap di akun sama dengan nama ibu di data orangtua.</td></tr>';
+    }
+    ?>
+</tbody>
+            </table>
+        </div>
+    </div>
+</section>
         <section id="galeri" class="mb-5 pt-4">
     <h3 class="section-header">Galeri Kegiatan</h3>
     <div class="row g-3">
         <?php
-        // Query ambil data galeri terbaru
-        $query_galeri = mysqli_query($koneksi, "SELECT * FROM t_galeri ORDER BY id_galeri DESC LIMIT 6"); // Limit 6 foto
+        // Pastikan variabel $koneksi (mysqli) sudah tersedia dari file header/index Anda
+        $query_galeri = mysqli_query($koneksi, "SELECT * FROM t_galeri ORDER BY id_galeri DESC LIMIT 6"); 
         
         if (mysqli_num_rows($query_galeri) > 0) {
             while ($foto = mysqli_fetch_assoc($query_galeri)) {
@@ -222,23 +195,30 @@ $query_jadwal = mysqli_query($koneksi, "SELECT * FROM t_jadwal ORDER BY tanggal 
                     <div class="card h-100 border-0 shadow-sm">
                         <img src="uploads/<?= htmlspecialchars($foto['nama_file']); ?>" 
                              class="gallery-img card-img-top" 
-                             alt="<?= htmlspecialchars($foto['judul']); ?>"
-                             style="height: 250px; object-fit: cover;">
-                        <div class="card-body p-2 text-center bg-white">
-                            <small class="text-muted fw-bold"><?= htmlspecialchars($foto['judul']); ?></small>
+                             style="height: 200px; object-fit: cover;"
+                             alt="<?= htmlspecialchars($foto['judul']); ?>">
+                        
+                        <div class="card-body p-3 text-center bg-white d-flex flex-column justify-content-center">
+                            <h6 class="card-title fw-bold text-dark mb-1">
+                                <?= htmlspecialchars($foto['judul']); ?>
+                            </h6>
+                            
+                            <?php if (!empty($foto['keterangan'])): ?>
+                                <p class="card-text small text-muted mb-0" style="font-size: 0.9rem;">
+                                    <?= htmlspecialchars($foto['keterangan']); ?>
+                                </p>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
                 <?php
             }
         } else {
-            echo '<div class="col-12 text-center text-muted">Belum ada dokumentasi kegiatan.</div>';
+            echo '<div class="col-12 text-center text-muted py-5">Belum ada dokumentasi kegiatan.</div>';
         }
         ?>
     </div>
 </section>
-
-    </div>
 
     <div class="modal fade" id="modalDaftar" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
@@ -255,8 +235,8 @@ $query_jadwal = mysqli_query($koneksi, "SELECT * FROM t_jadwal ORDER BY tanggal 
                         <input type="hidden" name="id_user" value="<?= $id_user_login; ?>">
 
                         <div class="mb-3">
-                            <label class="form-label fw-bold">Nama Pendaftar (Anda)</label>
-                            <input type="text" class="form-control bg-light" value="<?= $nama_lengkap_user; ?>" readonly>
+                            <label class="form-label fw-bold">Nama Pendaftar</label>
+                            <input type="text" class="form-control bg-light" value="<?= htmlspecialchars($nama_lengkap_user); ?>" readonly>
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-bold">Nama Kegiatan</label>
@@ -291,16 +271,12 @@ $query_jadwal = mysqli_query($koneksi, "SELECT * FROM t_jadwal ORDER BY tanggal 
     <script>
         const modalDaftar = document.getElementById('modalDaftar');
         modalDaftar.addEventListener('show.bs.modal', function (event) {
-            // Tombol yang memicu modal
             const button = event.relatedTarget;
-            
-            // Ambil data dari atribut data-*
             const idJadwal = button.getAttribute('data-id');
             const namaKegiatan = button.getAttribute('data-kegiatan');
             const tanggal = button.getAttribute('data-tanggal');
             const lokasi = button.getAttribute('data-lokasi');
 
-            // Isi nilai ke dalam input form modal
             document.getElementById('modal_id_jadwal').value = idJadwal;
             document.getElementById('modal_nama_kegiatan').value = namaKegiatan;
             document.getElementById('modal_tanggal').value = tanggal;
