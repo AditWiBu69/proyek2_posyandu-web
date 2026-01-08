@@ -1,22 +1,23 @@
 <?php
-session_start(); // WAJIB DI BARIS PERTAMA
+session_start();
 
-// 1. Masukkan koneksi
-include "connection.php"; 
+// 1. Hubungkan ke database (Gunakan koneksi.php yang sudah ada)
+include "koneksi.php"; 
 
-// Cek koneksi
-if (!isset($conn)) {
-    die("Error: File connection.php berhasil di-include, tapi variabel \$conn tidak ditemukan. Pastikan connection.php menggunakan PDO.");
+// Cek apakah variabel $koneksi tersedia (dari file koneksi.php)
+if (!isset($koneksi)) {
+    die("Error: Variabel \$koneksi tidak ditemukan. Pastikan file koneksi.php benar.");
 }
 
 // ==========================================
-// LOGIKA PHP UNTUK GALERI (UPLOAD & HAPUS)
+// LOGIKA PHP UNTUK GALERI (UPLOAD & HAPUS) - VERSI MYSQLI
 // ==========================================
 
 // A. Proses Upload
 if (isset($_POST['upload_foto'])) {
-    $judul      = htmlspecialchars($_POST['judul_galeri']);
-    $keterangan = htmlspecialchars($_POST['keterangan_galeri']); // Tambahan Keterangan
+    // Amankan input (SQL Injection Prevention untuk MySQLi)
+    $judul      = mysqli_real_escape_string($koneksi, $_POST['judul_galeri']);
+    $keterangan = mysqli_real_escape_string($koneksi, $_POST['keterangan_galeri']);
     
     // File handling
     $nama_file = $_FILES['file_gambar']['name'];
@@ -37,21 +38,14 @@ if (isset($_POST['upload_foto'])) {
         }
 
         if (move_uploaded_file($tmp_file, $tujuan)) {
-            try {
-                // INSERT MENGGUNAKAN PDO (Dengan kolom Keterangan)
-                $sql = "INSERT INTO t_galeri (judul, keterangan, nama_file) VALUES (:judul, :ket, :nama_file)";
-                $stmt = $conn->prepare($sql);
-                $simpan = $stmt->execute([
-                    ':judul' => $judul, 
-                    ':ket' => $keterangan, 
-                    ':nama_file' => $nama_baru
-                ]);
-                
-                if ($simpan) {
-                    echo "<script>alert('Foto berhasil diupload!'); window.location.href='data_anak.php#galeri-admin';</script>";
-                }
-            } catch (PDOException $e) {
-                echo "<script>alert('Error Database: " . $e->getMessage() . "');</script>";
+            // INSERT MENGGUNAKAN MYSQLI
+            $sql = "INSERT INTO t_galeri (judul, keterangan, nama_file) VALUES ('$judul', '$keterangan', '$nama_baru')";
+            $simpan = mysqli_query($koneksi, $sql);
+            
+            if ($simpan) {
+                echo "<script>alert('Foto berhasil diupload!'); window.location.href='data_anak.php#galeri-admin';</script>";
+            } else {
+                echo "<script>alert('Error Database: " . mysqli_error($koneksi) . "');</script>";
             }
         } else {
             echo "<script>alert('Gagal mengupload file ke folder uploads.');</script>";
@@ -63,29 +57,29 @@ if (isset($_POST['upload_foto'])) {
 
 // B. Proses Hapus
 if (isset($_GET['hapus_galeri'])) {
-    $id_hapus = $_GET['hapus_galeri'];
+    $id_hapus = mysqli_real_escape_string($koneksi, $_GET['hapus_galeri']);
     
-    try {
-        // Ambil nama file dulu untuk dihapus dari folder
-        $stmt = $conn->prepare("SELECT nama_file FROM t_galeri WHERE id_galeri = :id");
-        $stmt->execute([':id' => $id_hapus]);
-        $data_img = $stmt->fetch(PDO::FETCH_ASSOC);
-        
-        if ($data_img) {
-            // Hapus file fisik
-            $path = "uploads/" . $data_img['nama_file'];
-            if (file_exists($path)) {
-                unlink($path);
-            }
-            
-            // Hapus dari database (PDO)
-            $del = $conn->prepare("DELETE FROM t_galeri WHERE id_galeri = :id");
-            $del->execute([':id' => $id_hapus]);
-            
-            echo "<script>alert('Foto dihapus.'); window.location.href='data_anak.php#galeri-admin';</script>";
+    // Ambil nama file dulu untuk dihapus dari folder
+    $cek_sql = "SELECT nama_file FROM t_galeri WHERE id_galeri = '$id_hapus'";
+    $cek_query = mysqli_query($koneksi, $cek_sql);
+    $data_img = mysqli_fetch_assoc($cek_query);
+    
+    if ($data_img) {
+        // Hapus file fisik
+        $path = "uploads/" . $data_img['nama_file'];
+        if (file_exists($path)) {
+            unlink($path);
         }
-    } catch (PDOException $e) {
-        echo "<script>alert('Gagal menghapus: " . $e->getMessage() . "');</script>";
+        
+        // Hapus dari database (MySQLi)
+        $del_sql = "DELETE FROM t_galeri WHERE id_galeri = '$id_hapus'";
+        $del = mysqli_query($koneksi, $del_sql);
+        
+        if($del) {
+            echo "<script>alert('Foto dihapus.'); window.location.href='data_anak.php#galeri-admin';</script>";
+        } else {
+             echo "<script>alert('Gagal menghapus database.');</script>";
+        }
     }
 }
 ?>
@@ -250,7 +244,7 @@ if (isset($_GET['hapus_galeri'])) {
                     </a>
                 </li>
                 <li class="nav-item d-md-none mt-2">
-                    <a class="nav-link bg-danger text-white justify-content-center" href="index.html">
+                    <a class="nav-link bg-danger text-white justify-content-center" href="logout.php">
                         <i class="fas fa-sign-out-alt"></i> Keluar
                     </a>
                 </li>
@@ -258,7 +252,7 @@ if (isset($_GET['hapus_galeri'])) {
         </div>
 
         <div class="sidebar-footer d-none d-md-block">
-            <a href="index.html" class="btn btn-logout">
+            <a href="logout.php" class="btn btn-logout">
                 <i class="fas fa-sign-out-alt me-2"></i> Keluar
             </a>
         </div>
@@ -296,18 +290,18 @@ if (isset($_GET['hapus_galeri'])) {
                       </thead>
                       <tbody>
                       <?php 
-                      // Mengambil Data Anak
+                      // Mengambil Data Anak (Versi MySQLi)
                       $sql = "SELECT t_anak.*, t_orangtua.nama_ibu 
                               FROM t_anak 
                               LEFT JOIN t_orangtua ON t_anak.id_orangtua = t_orangtua.id_orangtua 
                               ORDER BY t_anak.id_anak DESC";
-                      $query = $conn->query($sql); 
+                      $query = mysqli_query($koneksi, $sql); 
                       ?>
 
-                      <?php if ($query->rowCount() > 0): ?>
+                      <?php if (mysqli_num_rows($query) > 0): ?>
                         <?php
                         $no = 1; 
-                        foreach ($query->fetchAll(PDO::FETCH_ASSOC) as $row):
+                        while ($row = mysqli_fetch_assoc($query)):
                           $tgl_lahir = date('d-m-Y', strtotime($row['tanggal_lahir']));
                         ?>
                           <tr>
@@ -340,7 +334,7 @@ if (isset($_GET['hapus_galeri'])) {
                               </a>
                             </td>
                           </tr>
-                        <?php endforeach; ?>
+                        <?php endwhile; ?>
                       <?php else: ?>
                         <tr>
                           <td colspan="8" class="text-center py-5 text-muted">Belum ada data anak.</td>
@@ -383,11 +377,12 @@ if (isset($_GET['hapus_galeri'])) {
                 <h6 class="fw-bold mb-3 text-secondary">Daftar Foto Terupload:</h6>
                 <div class="row g-3">
                     <?php
-                    // Ambil data galeri
-                    $q_galeri = $conn->query("SELECT * FROM t_galeri ORDER BY id_galeri DESC");
+                    // Ambil data galeri (Versi MySQLi)
+                    $sql_galeri = "SELECT * FROM t_galeri ORDER BY id_galeri DESC";
+                    $q_galeri = mysqli_query($koneksi, $sql_galeri);
                     
-                    if ($q_galeri->rowCount() > 0) {
-                        foreach ($q_galeri->fetchAll(PDO::FETCH_ASSOC) as $g) {
+                    if (mysqli_num_rows($q_galeri) > 0) {
+                        while ($g = mysqli_fetch_assoc($q_galeri)) {
                     ?>
                         <div class="col-xl-2 col-md-3 col-6 text-center">
                             <div class="border p-2 rounded bg-light h-100 position-relative d-flex flex-column">
