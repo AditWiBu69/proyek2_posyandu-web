@@ -1,5 +1,5 @@
 <?php
-include_once('connection.php');
+include 'koneksi.php';
 
 // 1. Ambil data dari form (perhatikan nama variabelnya)
 $nama_anak     = $_POST['nama_anak'];

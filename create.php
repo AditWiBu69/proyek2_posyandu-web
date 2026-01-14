@@ -1,6 +1,6 @@
 <?php
 // Pastikan file koneksi sudah ada
-include "connection.php"; 
+include 'koneksi.php'; 
 ?>
 
 <!DOCTYPE html>
@@ -27,15 +27,17 @@ include "connection.php";
             <?php
             // Mengambil data dari tabel t_orangtua
             // Asumsi menggunakan PDO (sesuai kode Anda sebelumnya)
-            if(isset($conn)) {
-                $sql_ortu = $conn->query("SELECT * FROM t_orangtua ORDER BY nama_ibu ASC");
-                while ($row_ortu = $sql_ortu->fetch(PDO::FETCH_ASSOC)) {
-                    echo "<option value='" . $row_ortu['id_orangtua'] . "'>" . $row_ortu['nama_ibu'] . " (Ayah: " . $row_ortu['nama_ayah'] . ")</option>";
-                }
-            } else {
-                echo "<option value=''>Koneksi database gagal</option>";
-            }
-            ?>
+            if (isset($conn)) {
+             $sql_ortu = $conn->query("SELECT * FROM t_orangtua ORDER BY nama_ibu ASC");
+               while ($row_ortu = $sql_ortu->fetch_assoc()) {
+                       echo "<option value='" . $row_ortu['id_orangtua'] . "'>" 
+                       . $row_ortu['nama_ibu'] . " (Ayah: " . $row_ortu['nama_ayah'] . ")</option>";
+                        }
+                        } else {
+                           echo "<option value=''>Koneksi database gagal</option>";
+                                        }
+?>
+
         </select>
         <small class="form-text text-muted">Data ibu diambil dari Data Orang Tua.</small>
       </div>

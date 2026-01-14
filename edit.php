@@ -1,5 +1,5 @@
 <?php
-include_once("connection.php");
+include_once("koneksi.php");
 
 $statement = $conn->prepare('SELECT * FROM t_anak WHERE id_anak=:id_anak ');
 $statement->execute([
