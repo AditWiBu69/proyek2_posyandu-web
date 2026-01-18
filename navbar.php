@@ -24,6 +24,10 @@ if (!isset($page)) { $page = ''; }
                 <li class="nav-item">
                     <a class="nav-link <?= ($page == 'galeri') ? 'active fw-bold' : ''; ?>" href="galeri_user.php">Galeri</a>
                 </li>
+
+                <li class="nav-item">
+                    <a class="nav-link <?= ($page == 'profil') ? 'active fw-bold' : ''; ?>" href="profil.php">Profil</a>
+                </li>
                 
                 <li class="nav-item ms-lg-3">
                     <a class="btn btn-warning btn-sm fw-bold mt-1" href="logout.php" onclick="return confirm('Yakin ingin keluar?');">Logout</a>

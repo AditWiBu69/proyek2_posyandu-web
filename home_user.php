@@ -22,6 +22,7 @@ $nama_lengkap_user = $data_user['nama_lengkap'];
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home - User Posyandu</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         body { background-color: #f8f9fa; }
         .hero-banner {
@@ -73,12 +74,12 @@ $nama_lengkap_user = $data_user['nama_lengkap'];
                                 <th>Berat (BB)</th>
                                 <th>Tinggi (TB)</th>
                                 <th>Keterangan</th>
-                            </tr>
+                                </tr>
                         </thead>
                         <tbody>
                             <?php
                             $query = "
-                                SELECT tp.tgl_penimbangan, tp.umur, tp.berat_badan, tp.tinggi_badan, tp.keterangan, ta.nama_anak 
+                                SELECT ta.id_anak, tp.tgl_penimbangan, tp.umur, tp.berat_badan, tp.tinggi_badan, tp.keterangan, ta.nama_anak 
                                 FROM masuk m
                                 JOIN t_orangtua tor ON m.nama_lengkap = tor.nama_ibu
                                 JOIN t_anak ta ON tor.id_orangtua = ta.id_orangtua
@@ -89,6 +90,9 @@ $nama_lengkap_user = $data_user['nama_lengkap'];
 
                             $result = mysqli_query($koneksi, $query);
 
+                            // Array untuk menampung ID Anak yang unik untuk tombol di bawah
+                            $daftar_anak_unik = [];
+
                             if (mysqli_num_rows($result) > 0) {
                                 while ($row = mysqli_fetch_assoc($result)) {
                                     $ada_data = !empty($row['tgl_penimbangan']);
@@ -97,23 +101,41 @@ $nama_lengkap_user = $data_user['nama_lengkap'];
                                     $berat   = $ada_data ? htmlspecialchars($row['berat_badan']) . " Kg" : '<span class="badge bg-secondary">Belum ditimbang</span>';
                                     $tinggi  = $ada_data ? htmlspecialchars($row['tinggi_badan']) . " Cm" : '-';
                                     $ket     = $ada_data ? htmlspecialchars($row['keterangan']) : '-';
+                                    
+                                    // Simpan ID dan Nama Anak ke array (Index ID biar tidak duplikat)
+                                    $daftar_anak_unik[$row['id_anak']] = $row['nama_anak'];
 
                                     echo "<tr>
-                                        <td>{$tanggal}</td>
-                                        <td class='fw-bold text-primary'>" . htmlspecialchars($row['nama_anak']) . "</td>
-                                        <td>{$umur}</td>
-                                        <td>{$berat}</td>
-                                        <td>{$tinggi}</td>
-                                        <td>{$ket}</td>
-                                    </tr>";
+                                            <td>{$tanggal}</td>
+                                            <td class='fw-bold text-primary'>" . htmlspecialchars($row['nama_anak']) . "</td>
+                                            <td>{$umur}</td>
+                                            <td>{$berat}</td>
+                                            <td>{$tinggi}</td>
+                                            <td>{$ket}</td>
+                                          </tr>";
                                 }
                             } else {
+                                // Colspan jadi 6 karena kolom aksi dihapus
                                 echo '<tr><td colspan="6" class="text-center py-4 text-muted">Data anak tidak ditemukan. Pastikan nama akun sesuai dengan nama ibu di data posyandu.</td></tr>';
                             }
                             ?>
                         </tbody>
                     </table>
                 </div>
+
+                <?php if (!empty($daftar_anak_unik)): ?>
+                <div class="mt-4 pt-3 border-top">
+                    <h6 class="mb-3 text-muted"><i class="fas fa-info-circle me-1"></i> Lihat Grafik Pertumbuhan (KMS):</h6>
+                    <div class="d-flex flex-wrap gap-2">
+                        <?php foreach ($daftar_anak_unik as $id_anak => $nama_anak): ?>
+                            <a href="penimbangan/kms.php?id_anak=<?= $id_anak ?>" class="btn btn-lg btn-info text-white shadow-sm">
+                                <i class="fas fa-chart-line me-2"></i> Lihat KMS <?= htmlspecialchars($nama_anak) ?>
+                            </a>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+                <?php endif; ?>
+
             </div>
         </section>
 

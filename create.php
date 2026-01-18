@@ -27,8 +27,8 @@ include 'koneksi.php';
             <?php
             // Mengambil data dari tabel t_orangtua
             // Asumsi menggunakan PDO (sesuai kode Anda sebelumnya)
-            if (isset($conn)) {
-             $sql_ortu = $conn->query("SELECT * FROM t_orangtua ORDER BY nama_ibu ASC");
+            if (isset($koneksi)) {
+             $sql_ortu = $koneksi->query("SELECT * FROM t_orangtua ORDER BY nama_ibu ASC");
                while ($row_ortu = $sql_ortu->fetch_assoc()) {
                        echo "<option value='" . $row_ortu['id_orangtua'] . "'>" 
                        . $row_ortu['nama_ibu'] . " (Ayah: " . $row_ortu['nama_ayah'] . ")</option>";

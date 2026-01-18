@@ -1,16 +1,39 @@
 <?php
+// --- BAGIAN 1: PHP & KONEKSI ---
 include_once("koneksi.php");
 
-$statement = $conn->prepare('SELECT * FROM t_anak WHERE id_anak=:id_anak ');
-$statement->execute([
-  'id_anak' => $_GET['id_anak']
-]);
-$user = $statement->fetch(PDO::FETCH_ASSOC);
+// Cek apakah ada ID di URL
+if (isset($_GET['id_anak'])) {
+    $id_anak = $_GET['id_anak'];
+
+    // --- PERUBAHAN PENTING DI SINI ---
+    // Kita gunakan JOIN untuk mengambil nama ibu dari tabel t_orangtua
+    // Pastikan nama tabel 't_orangtua' sesuai dengan database Anda
+    $query  = "SELECT t_anak.*, t_orangtua.nama_ibu 
+               FROM t_anak 
+               LEFT JOIN t_orangtua ON t_anak.id_orangtua = t_orangtua.id_orangtua 
+               WHERE t_anak.id_anak = '$id_anak'";
+    
+    $result = mysqli_query($koneksi, $query);
+
+    // Cek error query
+    if (!$result) {
+        die("Query Error: " . mysqli_error($koneksi));
+    }
+
+    $data_anak = mysqli_fetch_assoc($result);
+
+    if (!$data_anak) {
+        die("Data anak tidak ditemukan.");
+    }
+
+} else {
+    die("ID Anak tidak disertakan di URL.");
+}
 ?>
 
 <!DOCTYPE html>
 <html>
-
 <head>
   <title>Edit Data Anak</title>
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
@@ -21,69 +44,52 @@ $user = $statement->fetch(PDO::FETCH_ASSOC);
   
   <div class="container">
     <h2 class="mt-4">Edit Data Anak</h2>
-    <form action="update.php?id_anak=<?php echo $_GET['id_anak']; ?>" method="post">
+    
+    <form action="update.php?id_anak=<?php echo $id_anak; ?>" method="post">
+      
       <div class="form-group">
-        <label for="nama_anak">Nama Anak:</label>
-        <input type="text" class="form-control" id="nama_anak" name="nama_anak" placeholder="Nama Anak"
-          value="<?php echo $user['nama_anak']; ?>" required>
+        <label>Nama Anak:</label>
+        <input type="text" class="form-control" name="nama_anak" 
+               value="<?php echo $data_anak['nama_anak']; ?>" required>
       </div>
+
       <div class="form-group">
-        <label for="nama_ibu">Nama Ibu:</label>
-        <input type="text" class="form-control" id="nama_ibu" name="nama_ibu" placeholder="Nama Ibu"
-          value="<?php echo $user['nama_ibu']; ?>" required>
+        <label>Nama Ibu:</label>
+        <input type="text" class="form-control" 
+               value="<?php echo $data_anak['nama_ibu']; ?>" readonly>
+        
+        <input type="hidden" name="id_orangtua" value="<?php echo $data_anak['id_orangtua']; ?>">
       </div>
+
       <div class="form-group">
-        <label for="tempat_lahir">Tempat Lahir:</label>
-        <input type="text" class="form-control" id="tempat_lahir" name="tempat_lahir" placeholder="Tempat Lahir"
-          value="<?php echo $user['tempat_lahir']; ?>" required>
+        <label>Tempat Lahir:</label>
+        <input type="text" class="form-control" name="tempat_lahir" 
+               value="<?php echo $data_anak['tempat_lahir']; ?>" required>
       </div>
+
       <div class="form-group">
-        <label for="tanggal_lahir">Tanggal Lahir:</label>
-        <input type="date" class="form-control" id="tanggal_lahir" name="tanggal_lahir"
-          value="<?php echo $user['tanggal_lahir']; ?>" required>
+        <label>Tanggal Lahir:</label>
+        <input type="date" class="form-control" name="tanggal_lahir"
+               value="<?php echo $data_anak['tanggal_lahir']; ?>" required>
       </div>
+
       <div class="form-group">
-        <label for="jenis_kelamin">Jenis Kelamin:</label>
-        <select class="form-control" id="jenis_kelamin" name="jenis_kelamin" required>
-          <option value="Laki-laki" <?php if ($user['jenis_kelamin'] == 'Laki-laki')
-            echo 'selected'; ?>>Laki-laki
-          </option>
-          <option value="Perempuan" <?php if ($user['jenis_kelamin'] == 'Perempuan')
-            echo 'selected'; ?>>Perempuan
-          </option>
+        <label>Jenis Kelamin:</label>
+        <select class="form-control" name="jenis_kelamin" required>
+          <option value="Laki-laki" <?php echo ($data_anak['jenis_kelamin'] == 'Laki-laki') ? 'selected' : ''; ?>>Laki-laki</option>
+          <option value="Perempuan" <?php echo ($data_anak['jenis_kelamin'] == 'Perempuan') ? 'selected' : ''; ?>>Perempuan</option>
         </select>
       </div>
+
       <div class="form-group">
-        <label for="alamat">Alamat:</label>
-        <input type="text" class="form-control" id="alamat" name="alamat" placeholder="Alamat"
-          value="<?php echo $user['alamat']; ?>" required>
+        <label>Alamat:</label>
+        <input type="text" class="form-control" name="alamat" 
+               value="<?php echo $data_anak['alamat']; ?>" required>
       </div>
+
       <button type="submit" class="btn btn-primary">Update</button>
+      <a href="data_anak.php" class="btn btn-secondary">Kembali</a>
     </form>
   </div>
-
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-
-  <?php
-  // Cek apakah ada parameter status=sukses di URL
-  if (isset($_GET['status']) && $_GET['status'] == 'sukses') {
-      echo "<script>
-          Swal.fire({
-              title: 'Berhasil!',
-              text: 'Data anak berhasil diupdate!',
-              icon: 'success',
-              confirmButtonText: 'OK'
-          }).then((result) => {
-              // Opsional: Jika tombol OK diklik, pindah ke halaman data_anak.php
-              if (result.isConfirmed) {
-                  window.location.href = 'data_anak.php'; 
-              }
-          });
-      </script>";
-  }
-  ?>
 </body>
-
 </html>
