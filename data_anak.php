@@ -1,21 +1,20 @@
 <?php
 session_start();
 
-// 1. Hubungkan ke database (Gunakan koneksi.php yang sudah ada)
-include "koneksi.php"; 
+// 1. Hubungkan ke database
+include "koneksi.php";
 
-// Cek apakah variabel $koneksi tersedia (dari file koneksi.php)
+// Cek koneksi
 if (!isset($koneksi)) {
     die("Error: Variabel \$koneksi tidak ditemukan. Pastikan file koneksi.php benar.");
 }
 
 // ==========================================
-// LOGIKA PHP UNTUK GALERI (UPLOAD & HAPUS) - VERSI MYSQLI
+// LOGIKA PHP UNTUK GALERI (UPLOAD & HAPUS)
 // ==========================================
 
 // A. Proses Upload
 if (isset($_POST['upload_foto'])) {
-    // Amankan input (SQL Injection Prevention untuk MySQLi)
     $judul      = mysqli_real_escape_string($koneksi, $_POST['judul_galeri']);
     $keterangan = mysqli_real_escape_string($koneksi, $_POST['keterangan_galeri']);
     
@@ -32,13 +31,11 @@ if (isset($_POST['upload_foto'])) {
     $allowed = ['jpg', 'jpeg', 'png', 'gif'];
     
     if (in_array($ekstensi, $allowed)) {
-        // Pastikan folder uploads ada
         if (!is_dir('uploads')) {
             mkdir('uploads', 0777, true);
         }
 
         if (move_uploaded_file($tmp_file, $tujuan)) {
-            // INSERT MENGGUNAKAN MYSQLI
             $sql = "INSERT INTO t_galeri (judul, keterangan, nama_file) VALUES ('$judul', '$keterangan', '$nama_baru')";
             $simpan = mysqli_query($koneksi, $sql);
             
@@ -59,7 +56,7 @@ if (isset($_POST['upload_foto'])) {
 if (isset($_GET['hapus_galeri'])) {
     $id_hapus = mysqli_real_escape_string($koneksi, $_GET['hapus_galeri']);
     
-    // Ambil nama file dulu untuk dihapus dari folder
+    // Ambil nama file dulu
     $cek_sql = "SELECT nama_file FROM t_galeri WHERE id_galeri = '$id_hapus'";
     $cek_query = mysqli_query($koneksi, $cek_sql);
     $data_img = mysqli_fetch_assoc($cek_query);
@@ -71,7 +68,7 @@ if (isset($_GET['hapus_galeri'])) {
             unlink($path);
         }
         
-        // Hapus dari database (MySQLi)
+        // Hapus dari database
         $del_sql = "DELETE FROM t_galeri WHERE id_galeri = '$id_hapus'";
         $del = mysqli_query($koneksi, $del_sql);
         
@@ -96,106 +93,28 @@ if (isset($_GET['hapus_galeri'])) {
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
 
   <style>
-    body { 
-        background-color: #f0f2f5; 
-        font-family: 'Poppins', sans-serif; 
-        overflow-x: hidden;
-    }
+    body { background-color: #f0f2f5; font-family: 'Poppins', sans-serif; overflow-x: hidden; }
     
     /* Layout Wrapper */
-    .d-flex-wrapper {
-        display: flex;
-        width: 100%;
-        min-height: 100vh;
-    }
+    .d-flex-wrapper { display: flex; width: 100%; min-height: 100vh; }
 
     /* Sidebar Styling */
-    .sidebar {
-        width: 280px;
-        background: linear-gradient(180deg, #4e73df 0%, #224abe 100%);
-        color: white;
-        flex-shrink: 0;
-        min-height: 100vh;
-        position: sticky;
-        top: 0;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .sidebar-logo {
-        padding: 20px;
-        text-align: center;
-        border-bottom: 1px solid rgba(255,255,255,0.1);
-    }
-    .sidebar-logo img {
-        width: 60px;
-        height: 60px;
-        border-radius: 50%;
-        background: white;
-        padding: 3px;
-        margin-bottom: 10px;
-    }
-    .sidebar-brand {
-        font-size: 1.2rem;
-        font-weight: 600;
-        letter-spacing: 1px;
-        display: block;
-    }
-
-    .sidebar-menu {
-        padding: 20px 15px;
-        flex-grow: 1;
-    }
-
-    .nav-link {
-        color: rgba(255,255,255,0.8) !important;
-        font-weight: 500;
-        margin-bottom: 8px;
-        border-radius: 10px;
-        padding: 12px 15px;
-        transition: all 0.3s;
-        display: flex;
-        align-items: center;
-    }
+    .sidebar { width: 280px; background: linear-gradient(180deg, #4e73df 0%, #224abe 100%); color: white; flex-shrink: 0; min-height: 100vh; position: sticky; top: 0; display: flex; flex-direction: column; }
+    .sidebar-logo { padding: 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .sidebar-logo img { width: 60px; height: 60px; border-radius: 50%; background: white; padding: 3px; margin-bottom: 10px; }
+    .sidebar-brand { font-size: 1.2rem; font-weight: 600; letter-spacing: 1px; display: block; }
+    .sidebar-menu { padding: 20px 15px; flex-grow: 1; }
     
-    .nav-link i {
-        width: 25px;
-        text-align: center;
-        margin-right: 10px;
-    }
+    .nav-link { color: rgba(255,255,255,0.8) !important; font-weight: 500; margin-bottom: 8px; border-radius: 10px; padding: 12px 15px; transition: all 0.3s; display: flex; align-items: center; }
+    .nav-link i { width: 25px; text-align: center; margin-right: 10px; }
+    .nav-link:hover, .nav-link.active { background-color: rgba(255,255,255,0.2); color: #fff !important; transform: translateX(5px); }
 
-    .nav-link:hover, .nav-link.active {
-        background-color: rgba(255,255,255,0.2);
-        color: #fff !important;
-        transform: translateX(5px);
-    }
-
-    .sidebar-footer {
-        padding: 20px;
-        border-top: 1px solid rgba(255,255,255,0.1);
-    }
-    
-    .btn-logout {
-        width: 100%;
-        background-color: #dc3545;
-        color: white !important;
-        border: none;
-        border-radius: 10px;
-        padding: 10px;
-        text-align: center;
-        transition: 0.3s;
-    }
-    .btn-logout:hover {
-        background-color: #bb2d3b;
-        transform: scale(1.02);
-    }
+    .sidebar-footer { padding: 20px; border-top: 1px solid rgba(255,255,255,0.1); }
+    .btn-logout { width: 100%; background-color: #dc3545; color: white !important; border: none; border-radius: 10px; padding: 10px; text-align: center; transition: 0.3s; }
+    .btn-logout:hover { background-color: #bb2d3b; transform: scale(1.02); }
 
     /* Main Content Styling */
-    .main-content {
-        flex-grow: 1;
-        padding: 30px;
-        width: 100%; 
-    }
+    .main-content { flex-grow: 1; padding: 30px; width: 100%; }
 
     /* Card Custom */
     .card-custom { border: none; border-radius: 15px; box-shadow: 0 0 20px rgba(0,0,0,0.05); background: white; overflow: hidden; }
@@ -233,6 +152,13 @@ if (isset($_GET['hapus_galeri'])) {
                         <i class="fas fa-child"></i> Data Anak
                     </a>
                 </li>
+                
+                <li class="nav-item">
+                    <a class="nav-link" href="data_orangtua.php">
+                        <i class="fas fa-user-friends"></i> Data Orangtua
+                    </a>
+                </li>
+
                 <li class="nav-item">
                     <a class="nav-link" href="#galeri-admin">
                         <i class="fas fa-images"></i> Galeri
@@ -243,6 +169,7 @@ if (isset($_GET['hapus_galeri'])) {
                         <i class="fas fa-calendar-alt"></i> Jadwal
                     </a>
                 </li>
+                
                 <li class="nav-item d-md-none mt-2">
                     <a class="nav-link bg-danger text-white justify-content-center" href="logout.php">
                         <i class="fas fa-sign-out-alt"></i> Keluar
@@ -257,7 +184,6 @@ if (isset($_GET['hapus_galeri'])) {
             </a>
         </div>
     </nav>
-
     <div class="main-content">
         
         <div class="d-block d-md-none mb-4 text-center">
@@ -290,7 +216,6 @@ if (isset($_GET['hapus_galeri'])) {
                       </thead>
                       <tbody>
                       <?php 
-                      // Mengambil Data Anak (Versi MySQLi)
                       $sql = "SELECT t_anak.*, t_orangtua.nama_ibu 
                               FROM t_anak 
                               LEFT JOIN t_orangtua ON t_anak.id_orangtua = t_orangtua.id_orangtua 
@@ -377,7 +302,6 @@ if (isset($_GET['hapus_galeri'])) {
                 <h6 class="fw-bold mb-3 text-secondary">Daftar Foto Terupload:</h6>
                 <div class="row g-3">
                     <?php
-                    // Ambil data galeri (Versi MySQLi)
                     $sql_galeri = "SELECT * FROM t_galeri ORDER BY id_galeri DESC";
                     $q_galeri = mysqli_query($koneksi, $sql_galeri);
                     
@@ -412,6 +336,9 @@ if (isset($_GET['hapus_galeri'])) {
                 </div>
 
             </div>
-        </div> </div> </div> <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        </div>
+        </div> 
+    </div> 
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
