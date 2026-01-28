@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3307
--- Waktu pembuatan: 08 Jan 2026 pada 09.19
+-- Waktu pembuatan: 28 Jan 2026 pada 14.18
 -- Versi server: 10.4.28-MariaDB
 -- Versi PHP: 8.2.4
 
@@ -66,7 +66,7 @@ CREATE TABLE `t_anak` (
 --
 
 INSERT INTO `t_anak` (`id_anak`, `nama_anak`, `id_orangtua`, `tempat_lahir`, `tanggal_lahir`, `jenis_kelamin`, `alamat`) VALUES
-(1, 'Rizky Pratama', 1, 'Bandung', '2023-01-15', 'Laki-laki', 'Jl. Merpati No. 10, RT 01/RW 03'),
+(1, 'Rizky Pratama ', 1, 'Bandung', '2023-01-15', 'Laki-laki', 'Jl. Merpati No. 10, RT 01/RW 03'),
 (2, 'Alya Kinanti', 1, 'Bandung', '2025-02-10', 'Perempuan', 'Jl. Merpati No. 10, RT 01/RW 03'),
 (3, 'Bagas Kara', 2, 'Jakarta', '2022-06-20', 'Laki-laki', 'Jl. Kenari Blok B, RT 05/RW 02'),
 (4, 'Citra Kirana', 3, 'Surabaya', '2024-03-05', 'Perempuan', 'Gg. Melati Putih No. 5'),
@@ -91,8 +91,7 @@ CREATE TABLE `t_galeri` (
 --
 
 INSERT INTO `t_galeri` (`id_galeri`, `judul`, `nama_file`, `tanggal_upload`, `keterangan`) VALUES
-(5, 'tes', 'galeri_1767802077.jpg', '2026-01-07 16:07:57', NULL),
-(6, 'tes2', 'galeri_1767802285.jpg', '2026-01-07 16:11:25', 'tes2');
+(5, 'tes', 'galeri_1767802077.jpg', '2026-01-07 16:07:57', NULL);
 
 -- --------------------------------------------------------
 
@@ -117,8 +116,9 @@ CREATE TABLE `t_jadwal` (
 INSERT INTO `t_jadwal` (`id_jadwal`, `nama_kegiatan`, `tanggal`, `waktu`, `tempat`, `deskripsi`, `created_at`) VALUES
 (1, 'Pemberian Vitamin A', '2026-02-10', '08:00 - 11:00', 'Posyandu Melati 1', 'Pembagian vitamin A gratis untuk balita usia 6-59 bulan.', '2026-01-07 15:24:10'),
 (2, 'Imunisasi Campak & Polio', '2026-02-24', '09:00 - 12:00', 'Balai Desa Suka Maju', 'Wajib membawa buku KIA.', '2026-01-07 15:24:10'),
-(3, 'Penyuluhan Gizi Buruk', '2026-03-05', '08:30 - 11:30', 'Aula Puskesmas', 'Edukasi MPASI yang sehat untuk mencegah stunting.', '2026-01-07 15:24:10'),
-(4, 'Penimbangan Rutin Januari', '2026-01-15', '08:00 - 11:00', 'Posyandu Melati 1', 'Kegiatan rutin bulanan selesai dilaksanakan.', '2026-01-07 15:24:10');
+(3, 'Penyuluhan Gizi Buruk', '2026-03-05', '08:30 - 11:30', 'Aula Puskesmas ', 'Edukasi MPASI yang sehat untuk mencegah stunting.', '2026-01-07 15:24:10'),
+(4, 'Penimbangan Rutin Januari', '2026-01-15', '08:00 - 11:00', 'Posyandu Melati 1', 'Kegiatan rutin bulanan selesai dilaksanakan.', '2026-01-07 15:24:10'),
+(6, 'vaksin flu', '2026-01-20', '11:11', 'sarijadi', 'vaksinasi balita', '2026-01-19 09:28:35');
 
 -- --------------------------------------------------------
 
@@ -139,7 +139,7 @@ CREATE TABLE `t_orangtua` (
 --
 
 INSERT INTO `t_orangtua` (`id_orangtua`, `nama_ibu`, `nama_ayah`, `alamat_ortu`, `no_hp`) VALUES
-(1, 'Ratna Sari', 'Budi Santoso', 'Jl. Merpati No. 10, RT 01/RW 03', '081234567890'),
+(1, 'Ratna Sari', 'Budi Santoso ', 'Jl. Merpati No. 10, RT 01/RW 03', '081234567890'),
 (2, 'Dewi Ayu Lestari', 'Andi Pratama', 'Jl. Kenari Blok B, RT 05/RW 02', '085678901234'),
 (3, 'Susi Susanti', 'Hendra Wijaya', 'Gg. Melati Putih No. 5', '089988776655'),
 (4, 'Mawar Melati', 'Joko Anwar', 'Jl. Anggrek Raya (Warga Pendatang)', '081122334455');
@@ -154,6 +154,7 @@ CREATE TABLE `t_pendaftaran` (
   `id_daftar` int(11) NOT NULL,
   `id_user` int(11) NOT NULL,
   `id_jadwal` int(11) NOT NULL,
+  `id_anak` int(11) NOT NULL,
   `tgl_daftar` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -161,11 +162,15 @@ CREATE TABLE `t_pendaftaran` (
 -- Dumping data untuk tabel `t_pendaftaran`
 --
 
-INSERT INTO `t_pendaftaran` (`id_daftar`, `id_user`, `id_jadwal`, `tgl_daftar`) VALUES
-(1, 2, 1, '2026-01-20 01:00:00'),
-(2, 2, 2, '2026-01-20 01:05:00'),
-(3, 3, 1, '2026-01-21 02:00:00'),
-(4, 4, 3, '2026-01-22 03:00:00');
+INSERT INTO `t_pendaftaran` (`id_daftar`, `id_user`, `id_jadwal`, `id_anak`, `tgl_daftar`) VALUES
+(2, 2, 4, 1, '2026-01-08 08:34:34'),
+(3, 2, 4, 2, '2026-01-08 08:34:46'),
+(4, 2, 1, 1, '2026-01-08 08:49:12'),
+(5, 2, 2, 2, '2026-01-08 08:49:16'),
+(6, 2, 3, 2, '2026-01-08 08:49:20'),
+(7, 2, 2, 1, '2026-01-19 09:29:13'),
+(8, 2, 6, 1, '2026-01-19 09:29:27'),
+(9, 2, 6, 2, '2026-01-19 09:29:54');
 
 -- --------------------------------------------------------
 
@@ -298,7 +303,8 @@ ALTER TABLE `t_orangtua`
 ALTER TABLE `t_pendaftaran`
   ADD PRIMARY KEY (`id_daftar`),
   ADD KEY `fk_daftar_user` (`id_user`),
-  ADD KEY `fk_daftar_jadwal` (`id_jadwal`);
+  ADD KEY `fk_daftar_jadwal` (`id_jadwal`),
+  ADD KEY `fk_daftar_anak` (`id_anak`);
 
 --
 -- Indeks untuk tabel `t_penimbangan`
@@ -321,7 +327,7 @@ ALTER TABLE `masuk`
 -- AUTO_INCREMENT untuk tabel `t_anak`
 --
 ALTER TABLE `t_anak`
-  MODIFY `id_anak` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id_anak` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT untuk tabel `t_galeri`
@@ -333,19 +339,19 @@ ALTER TABLE `t_galeri`
 -- AUTO_INCREMENT untuk tabel `t_jadwal`
 --
 ALTER TABLE `t_jadwal`
-  MODIFY `id_jadwal` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id_jadwal` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT untuk tabel `t_orangtua`
 --
 ALTER TABLE `t_orangtua`
-  MODIFY `id_orangtua` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id_orangtua` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT untuk tabel `t_pendaftaran`
 --
 ALTER TABLE `t_pendaftaran`
-  MODIFY `id_daftar` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id_daftar` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT untuk tabel `t_penimbangan`
@@ -367,6 +373,7 @@ ALTER TABLE `t_anak`
 -- Ketidakleluasaan untuk tabel `t_pendaftaran`
 --
 ALTER TABLE `t_pendaftaran`
+  ADD CONSTRAINT `fk_daftar_anak` FOREIGN KEY (`id_anak`) REFERENCES `t_anak` (`id_anak`) ON DELETE CASCADE,
   ADD CONSTRAINT `fk_daftar_jadwal` FOREIGN KEY (`id_jadwal`) REFERENCES `t_jadwal` (`id_jadwal`) ON DELETE CASCADE,
   ADD CONSTRAINT `fk_daftar_user` FOREIGN KEY (`id_user`) REFERENCES `masuk` (`id_user`) ON DELETE CASCADE;
 
