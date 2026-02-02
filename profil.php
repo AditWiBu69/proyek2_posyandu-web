@@ -38,9 +38,12 @@ if (isset($_POST['simpan_perubahan'])) {
 
 // 3. Ambil Data Profil
 $username_session = $_SESSION['username'];
-$query = "SELECT t.* FROM t_orangtua t 
+$query = "SELECT t.*, GROUP_CONCAT(a.nama_anak SEPARATOR ', ') as daftar_anak 
+          FROM t_orangtua t 
           JOIN masuk m ON m.nama_lengkap = t.nama_ibu 
-          WHERE m.username = '$username_session'";
+          LEFT JOIN t_anak a ON t.id_orangtua = a.id_orangtua
+          WHERE m.username = '$username_session'
+          GROUP BY t.id_orangtua";
 
 $result = mysqli_query($koneksi, $query);
 $data   = mysqli_fetch_assoc($result);
@@ -126,12 +129,11 @@ $ada_data = ($data) ? true : false;
                     <?php if ($ada_data): ?>
                         
                         <div class="profile-header">
-                            <div class="avatar-circle">
-                                <i class="fas fa-user"></i>
-                            </div>
-                            <h4 class="mb-0"><?php echo htmlspecialchars($data['nama_ibu']); ?></h4>
-                            <span class="badge bg-success rounded-pill mt-2">Terdaftar</span>
-                        </div>
+    <div class="avatar-circle">
+        <i class="fas fa-baby"></i> </div>
+    <h4 class="mb-0"><?php echo !empty($data['daftar_anak']) ? htmlspecialchars($data['daftar_anak']) : 'Anak Belum Terdaftar'; ?></h4>
+    <span class="badge bg-success rounded-pill mt-2">Data Anak</span>
+</div>
 
                         <div class="profile-body">
                             

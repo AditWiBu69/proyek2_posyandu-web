@@ -29,11 +29,12 @@
   $id_anak = $_GET["id_anak"];
   include_once("connection_pnb.php");
   ?>
+  
   <div class="navbar navbar-expand-lg navbar-light bg-light">
     <div class="navbar-logo">
       <img src="../img/Favicon.png" alt="Posyandu Logo">
     </div>
-    <a class="navbar-brand" href="#">Posyandu</a>
+    <a class="navbar-brand" href="#">Posyandu Sarijadi</a>
     <ul class="navbar-menu navbar-nav ms-auto">
       <li class="nav-item"><a class="nav-link" href="kms.php?id_anak=<?php echo $id_anak; ?>">KMS </a></li>
       <li class="nav-item"><a class="nav-link" href="../data_anak.php">Kembali ke Data Anak</a></li>
@@ -46,9 +47,8 @@
       <thead class="table-dark">
         <tr>
           <th class="text-center">No</th>
-          <th class="text-center">ID Anak</th>
           <th class="text-center">Tanggal Penimbangan</th>
-          <th class="text-center">Umur</th>
+          <th class="text-center">Umur (Saat Ditimbang)</th>
           <th class="text-center">Berat Badan</th>
           <th class="text-center">Tinggi Badan</th>
           <th class="text-center">Keterangan</th>
@@ -57,12 +57,37 @@
           <th class="text-center">Action</th>
         </tr>
       </thead>
-      <?php $query = $conn->query("SELECT * FROM t_penimbangan WHERE id_anak = '$id_anak'"); ?>
+      
+      <?php 
+      // --- PERBAIKAN QUERY ---
+      // Kita lakukan JOIN antara t_penimbangan dan t_anak untuk mengambil tanggal_lahir
+      $sql = "SELECT t_penimbangan.*, t_anak.tanggal_lahir 
+              FROM t_penimbangan 
+              JOIN t_anak ON t_penimbangan.id_anak = t_anak.id_anak 
+              WHERE t_penimbangan.id_anak = '$id_anak' 
+              ORDER BY t_penimbangan.tgl_penimbangan DESC";
+      
+      $query = $conn->query($sql); 
+      ?>
 
       <?php if ($query->rowCount() > 0): ?>
         <?php
         $no = 1;
         foreach ($query->fetchAll(PDO::FETCH_ASSOC) as $row):
+          
+          // --- LOGIKA HITUNG UMUR ---
+          // 1. Ambil Tanggal Lahir dari tabel t_anak
+          $tgl_lahir = new DateTime($row['tanggal_lahir']);
+          
+          // 2. Ambil Tanggal Penimbangan dari tabel t_penimbangan
+          $tgl_timbang = new DateTime($row['tgl_penimbangan']);
+          
+          // 3. Hitung selisihnya
+          $selisih = $tgl_timbang->diff($tgl_lahir);
+          
+          // 4. Format output menjadi String
+          $umur_detail = $selisih->y . " tahun - " . $selisih->m . " bulan - " . $selisih->d . " hari";
+          // --------------------------
           ?>
           <tr>
             <td class="text-center">
@@ -70,19 +95,17 @@
             </td>
             
             <td class="text-center">
-              <?php echo $row['id_anak']; ?>
+              <?php echo date('d-m-Y', strtotime($row['tgl_penimbangan'])); ?>
+            </td>
+            
+            <td class="text-center">
+              <?php echo $umur_detail; ?>
             </td>
             <td class="text-center">
-              <?php echo $row['tgl_penimbangan']; ?>
+              <?php echo $row['berat_badan']; ?> kg
             </td>
             <td class="text-center">
-              <?php echo $row['umur']; ?>
-            </td>
-            <td class="text-center">
-              <?php echo $row['berat_badan']; ?>
-            </td>
-            <td class="text-center">
-              <?php echo $row['tinggi_badan']; ?>
+              <?php echo $row['tinggi_badan']; ?> cm
             </td>
             <td class="text-center">
               <?php echo $row['keterangan']; ?>
@@ -98,13 +121,13 @@
                 <i class="fas fa-pencil-alt"></i> 
               </a>
               <a href="delete_pnb.php?id_penimbangan=<?php echo $row['id_penimbangan']; ?>&id_anak=<?php echo $row['id_anak']; ?>"
-                class="btn btn-sm btn-danger">
+                class="btn btn-sm btn-danger" onclick="return confirm('Yakin ingin menghapus data ini?');">
                 <i class="fas fa-trash"></i> 
               </a>
             </td>
           </tr>
           <?php
-          $no++; // Angka bertambah setiap baris
+          $no++; 
         endforeach;
         ?>
       <?php else: ?>
