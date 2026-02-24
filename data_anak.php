@@ -175,6 +175,11 @@ if (isset($_GET['hapus_galeri'])) {
                         <i class="fas fa-sign-out-alt"></i> Keluar
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#vaksin-admin">
+                     <i class="fas fa-syringe"></i> Stok Vaksin
+                     </a>
+</li>
             </ul>
         </div>
 
@@ -270,11 +275,75 @@ if (isset($_GET['hapus_galeri'])) {
                 </div>
             </div>
         </div>
+<div id="vaksin-admin" class="card card-custom mb-5">
+            <div class="card-header-custom bg-white">
+                <h4 class="m-0 fw-bold text-info"><i class="fas fa-syringe me-2"></i>Manajemen Stok Vaksin & Vitamin</h4>
+                <a href="tambah_vaksin.php" class="btn btn-info text-white rounded-pill shadow-sm">
+                    <i class="fas fa-plus me-1"></i> Tambah Stok
+                </a>
+            </div>
 
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                      <thead class="text-secondary">
+                        <tr>
+                          <th class="text-center py-3">No</th> 
+                          <th>Nama Vaksin/Vitamin</th>
+                          <th class="text-center">Sisa Stok</th>
+                          <th>Satuan</th>
+                          <th>Keterangan</th>
+                          <th class="text-center">Aksi</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                      <?php 
+                      $sql_vaksin = "SELECT * FROM t_vaksin ORDER BY nama_vaksin ASC";
+                      $query_vaksin = mysqli_query($koneksi, $sql_vaksin); 
+                      ?>
+
+                      <?php if (mysqli_num_rows($query_vaksin) > 0): ?>
+                        <?php
+                        $no_vaks = 1; 
+                        while ($row_vaks = mysqli_fetch_assoc($query_vaksin)):
+                        ?>
+                          <tr>
+                            <td class="text-center text-muted fw-bold"><?php echo $no_vaks++; ?></td>
+                            <td class="fw-bold text-dark"><?php echo htmlspecialchars($row_vaks['nama_vaksin']); ?></td>
+                            <td class="text-center">
+                                <?php if($row_vaks['stok'] <= 10) { ?>
+                                    <span class="badge bg-danger fs-6"><?php echo $row_vaks['stok']; ?></span>
+                                <?php } else { ?>
+                                    <span class="badge bg-success fs-6"><?php echo $row_vaks['stok']; ?></span>
+                                <?php } ?>
+                            </td>
+                            <td><?php echo htmlspecialchars($row_vaks['satuan']); ?></td>
+                            <td class="small text-muted"><?php echo htmlspecialchars($row_vaks['keterangan']); ?></td>
+                            <td class="text-center">
+                              <a href="edit_vaksin.php?id_vaksin=<?php echo $row_vaks['id_vaksin']; ?>" class="btn btn-sm btn-warning text-white action-btn" title="Edit Stok">
+                                <i class="fas fa-pencil-alt"></i>
+                              </a>
+                              <a href="hapus_vaksin.php?id_vaksin=<?php echo $row_vaks['id_vaksin']; ?>" class="btn btn-sm btn-danger action-btn" onclick="return confirm('Yakin ingin menghapus vaksin ini?')" title="Hapus">
+                                <i class="fas fa-trash"></i>
+                              </a>
+                            </td>
+                          </tr>
+                        <?php endwhile; ?>
+                      <?php else: ?>
+                        <tr>
+                          <td colspan="6" class="text-center py-5 text-muted">Data stok vaksin kosong.</td>
+                        </tr>
+                      <?php endif; ?>
+                      </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
         <div id="galeri-admin" class="card card-custom">
             <div class="card-header-custom bg-white">
                 <h4 class="m-0 fw-bold text-success"><i class="fas fa-images me-2"></i>Manajemen Galeri Kegiatan</h4>
             </div>
+            
             <div class="card-body p-4">
                 
                 <form action="" method="POST" enctype="multipart/form-data" class="row g-3 mb-4 border-bottom pb-4">
